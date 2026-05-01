@@ -67,13 +67,20 @@ async function loadRequests() {
 
     div.innerHTML = `
       <div>
-        📧 ${s.customer_email}<br>
-        ✈ ${s.metadata.from} → ${s.metadata.to}
-      </div>
+  📧 ${s.customer_email}<br>
+  ✈ ${s.metadata.from} → ${s.metadata.to}<br>
+  <span>🟡 ${s.status || "pending"}</span>
+</div>
 
-      <button onclick="generate(${i})">
-        Générer PDF
-      </button>
+<div style="display:flex; gap:10px">
+  <button onclick="generate(${i})">
+    Générer
+  </button>
+
+  <button onclick="autoGenerate(${i})">
+    ⚡ Auto
+  </button>
+</div>
     `;
 
     list.appendChild(div);
@@ -92,6 +99,19 @@ async function generate(index) {
 
   alert("✅ PDF envoyé");
 
+  loadRequests();
+}
+async function autoGenerate(index) {
+
+  await fetch(`${API}/admin/generate-premium`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ sessionIndex: index })
+  });
+
+  alert("⚡ PDF auto envoyé");
   loadRequests();
 }
 
