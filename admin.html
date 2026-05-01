@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Tourizia Admin</title>
+
+  <style>
+    body {
+      font-family: Arial;
+      background: #0A1F44;
+      color: white;
+      padding: 30px;
+    }
+
+    h1 {
+      margin-bottom: 30px;
+    }
+
+    .card {
+      background: white;
+      color: black;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    button {
+      background: #1e3a8a;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background: #0A1F44;
+    }
+  </style>
+</head>
+
+<body>
+
+<h1>✈️ Tourizia Premium Dashboard</h1>
+
+<div id="list"></div>
+
+<script>
+
+const API = "https://duffel-backend-qrxh.onrender.com";
+
+async function loadRequests() {
+
+  const res = await fetch(`${API}/admin/premium-requests`);
+  const data = await res.json();
+
+  const list = document.getElementById("list");
+  list.innerHTML = "";
+
+  data.forEach((s, i) => {
+
+    const div = document.createElement("div");
+    div.className = "card";
+
+    div.innerHTML = `
+      <div>
+        📧 ${s.customer_email}<br>
+        ✈ ${s.metadata.from} → ${s.metadata.to}
+      </div>
+
+      <button onclick="generate(${i})">
+        Générer PDF
+      </button>
+    `;
+
+    list.appendChild(div);
+  });
+}
+
+async function generate(index) {
+
+  await fetch(`${API}/admin/generate-premium`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ sessionIndex: index })
+  });
+
+  alert("✅ PDF envoyé");
+
+  loadRequests();
+}
+
+loadRequests();
+
+</script>
+
+</body>
+</html>
