@@ -45,6 +45,10 @@
 <body>
 
 <h1>✈️ Tourizia Premium Dashboard</h1>
+<select id="filter" onchange="loadRequests()">
+  <option value="pending">🟡 Pending</option>
+  <option value="done">✅ Done</option>
+</select>
 
 <div id="list"></div>
 
@@ -54,8 +58,14 @@ const API = "https://api.tourizia.com";
 
 async function loadRequests() {
 
-  const res = await fetch(`${API}/admin/premium-requests`);
-  const data = await res.json();
+  const filter = document.getElementById("filter").value;
+
+const endpoint = filter === "done"
+  ? "/admin/history"
+  : "/admin/premium-requests";
+
+const res = await fetch(`${API}${endpoint}`);
+const data = await res.json();
 
   const list = document.getElementById("list");
   list.innerHTML = "";
@@ -71,6 +81,9 @@ async function loadRequests() {
   ✈ ${s.metadata.from} → ${s.metadata.to}<br>
   <span>🟡 ${s.status || "pending"}</span>
 </div>
+<input placeholder="Airline" id="airline-${i}">
+<input placeholder="Departure" id="dep-${i}">
+<input placeholder="Arrival" id="arr-${i}">
 
 <div style="display:flex; gap:10px">
   <button onclick="generate(${i})">
@@ -80,6 +93,10 @@ async function loadRequests() {
   <button onclick="autoGenerate(${i})">
     ⚡ Auto
   </button>
+  <button onclick="preview(${i})">👀 Preview</button>
+
+  <button onclick="generateCustom(${i})">✏️ Custom</button>
+
 </div>
     `;
 
@@ -113,6 +130,40 @@ async function autoGenerate(index) {
 
   alert("⚡ PDF auto envoyé");
   loadRequests();
+}
+async function preview(index) {
+
+  const res = await fetch(`${API}/admin/preview-ticket`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ sessionIndex: index })
+  });
+
+  const html = await res.text();
+
+  const win = window.open();
+  win.document.write(html);
+}
+async function generateCustom(index) {
+
+  const airline = document.getElementById(`airline-${index}`).value;
+  const dep = document.getElementById(`dep-${index}`).value;
+  const arr = document.getElementById(`arr-${index}`).value;
+
+  await fetch(`${API}/admin/generate-premium`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      sessionIndex: index,
+      airline,
+      departureTime: dep,
+      arrivalTime: arr
+    })
+  });
+
+  alert("✏️ PDF personnalisé envoyé");
 }
 
 loadRequests();
