@@ -80,6 +80,7 @@ const data = await res.json();
   📧 ${s.customer_email}<br>
   ✈ ${s.metadata.from} → ${s.metadata.to}<br>
   <span>🟡 ${s.status || "pending"}</span>
+  <span>🎯 Visa Score: ${s.metadata?.visaScore || "-"}/100</span>
 </div>
 <input placeholder="Airline" id="airline-${i}">
 <input placeholder="Departure" id="dep-${i}">
